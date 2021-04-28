@@ -1,0 +1,70 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
+
+additional_nics = "yes"
+additional_nics_dhcp = "no"  #Define if additional network adapters should be DHCP assigned
+additional_nics_num = 1  #Define the number of additional nics to add
+subnet = "10.0.4."  #Define subnet for private_network (If not using DHCP)
+subnet_ip_start = 129  #Define starting last octet of the subnet range to begin addresses for vm(s)
+
+Vagrant.configure("2") do |config|
+
+  id_rsa_pub = File.read("#{Dir.home}/.ssh/vagrant_users")
+  config.vm.provision "copy ssh public key", type: "shell",
+  inline: "echo \"#{id_rsa_pub}\" >> /home/vagrant/.ssh/authorized_keys"
+
+  ##### DEFINE VM #####
+  config.vm.define "centos7" do |config|
+  config.vm.hostname = "centos7"
+  config.vm.box = "centos/7"
+  config.vm.box_check_update = false
+###(1..N).each do |node_id|
+###    nid = (node_id - 1)
+      if additional_nics == "yes"
+        if additional_nics_dhcp == "no"
+          (1..additional_nics_num).each do |nic_num|
+            nnum = Random.rand(0..126)
+            config.vm.network :private_network, ip: subnet+"#{subnet_ip_start + nnum}"
+          end
+        end
+        if additional_nics_dhcp == "yes"
+          (1..additional_nics_num).each do |nic_num|
+            config.vm.network :private_network, type: "dhcp"
+          end
+        end
+      end
+###end
+  config.vm.provider :libvirt do |v|
+    v.memory = 1024
+    v.cpus = 1
+  end
+
+## shell script 
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
+
+        # add default gateway to eth1, remove default gw from eth0 to be reachable from tinc network 
+        ip route add default via 10.0.4.1 dev eth1
+        ip route del default via 192.168.121.1 dev eth0
+        echo "GATEWAY=10.0.4.1" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+	echo "DNS1=8.8.4.4" >> /etc/sysconfig/network-scripts/ifcfg-eth1
+        sed -i 's/ONBOOT="yes"/ONBOOT="no"/' /etc/sysconfig/network-scripts/ifcfg-eth0
+
+        rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+        rpm --import /vagrant/NetKnights-Release.asc
+        cp /vagrant/NetKnights-Release.asc /etc/pki/rpm-gpg/
+        cp /vagrant/privacyidea.repo.centos7.stable /etc/yum.repos.d/privacyidea.repo
+        yum -y install privacyidea-3.4.1-1.el7 privacyidea-server-3.4.1-1.el7 privacyidea-selinux
+        systemctl restart httpd mariadb
+        echo 'alias l="ls -lav"' >> ~/.bashrc
+        echo 'export LC_ALL=en_US.utf8' >> ~/.bashrc
+
+        # add pub keys  to root user
+        mkdir -p /root/.ssh &&  touch /root/.ssh/authorized_keys
+        cp /home/vagrant/.ssh/authorized_keys /root/.ssh/authorized_keys
+        ip a | grep 10.0.4
+  SHELL
+  end
+end
+

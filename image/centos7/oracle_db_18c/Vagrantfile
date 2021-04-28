@@ -1,0 +1,57 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
+
+additional_nics = "yes"
+additional_nics_dhcp = "no"  #Define if additional network adapters should be DHCP assigned
+additional_nics_num = 1  #Define the number of additional nics to add
+subnet = "10.0.4."  #Define subnet for private_network (If not using DHCP)
+subnet_ip_start = 129  #Define starting last octet of the subnet range to begin addresses for vm(s)
+
+Vagrant.configure("2") do |config|
+
+  id_rsa_pub = File.read("#{Dir.home}/.ssh/vagrant_users")
+  config.vm.provision "copy ssh public key", type: "shell",
+  inline: "echo \"#{id_rsa_pub}\" >> /home/vagrant/.ssh/authorized_keys"
+
+  ##### DEFINE VM #####
+  config.vm.define "centos7" do |config|
+  config.vm.hostname = "centos7-oracle"
+  config.vm.box = "centos/7"
+  config.vm.box_check_update = false
+###(1..N).each do |node_id|
+###    nid = (node_id - 1)
+      if additional_nics == "yes"
+        if additional_nics_dhcp == "no"
+          (1..additional_nics_num).each do |nic_num|
+            nnum = Random.rand(0..126)
+            config.vm.network :private_network, ip: subnet+"#{122}"
+          end
+        end
+        if additional_nics_dhcp == "yes"
+          (1..additional_nics_num).each do |nic_num|
+            config.vm.network :private_network, type: "dhcp"
+          end
+        end
+      end
+###end
+  config.vm.provider :libvirt do |v|
+    v.memory = 2048
+    v.cpus = 2 
+  end
+
+# see install_ora.sh script for changes
+
+    config.vm.provision "shell" do |s|
+    s.path = "install_ora.sh"
+    s.env = {
+             ORACLE_SID: "PI",
+             ORACLE_PASSWORD: "TEST1234",
+             ORACLE_CHARACTERSET: "AL32UTF8",
+             ORACLE_BASE: "/opt/oracle",
+             ORACLE_HOME: "/opt/oracle/product/18c/dbhomeXE"
+           }
+  	end
+    end
+  end
