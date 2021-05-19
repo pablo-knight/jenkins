@@ -2,7 +2,7 @@
 #
 VERSION="3.5.2"
 build_ubuntu16: #Build docker image .Dockerfile for build image.
-	docker build image/ubuntu16/Docker/. --label "u16_build"
+	docker build -it u16_build image/ubuntu16/Docker/.
 run_ubuntu16: #Build docker image .Dockerfile for build image.
 	docker run -it image/ubuntu16/Docker/.
 build_ubuntu18: #Build docker image .Dockerfile for build image.
