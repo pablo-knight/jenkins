@@ -5,5 +5,3 @@ COPY start.sh /
 RUN chmod 777 start.sh
 RUN bash start.sh
 CMD ["bash"]
-
-
