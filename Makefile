@@ -4,7 +4,7 @@ VERSION="3.5.2"
 build_ubuntu16: #Build docker image .Dockerfile for build image.
 	docker build -t u16_build image/ubuntu16/Docker/.
 run_u16:
-	docker run -it u16_build uname -r
+	docker run u16_build apt-get install ./ubuntu/
 build_ubuntu18: #Build docker image .Dockerfile for build image.
 	docker build -t u18_build image/ubuntu18/Docker/.
 build_ubuntu20: #Build docker image .Dockerfile for build image.
