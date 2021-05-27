@@ -14,7 +14,7 @@ VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
 
 RUN yum update -y
-RUN yum install -y git rpm-build libxml2-devel freetype-devel python-devel libxslt-devel zlib-devel openssl-devel python-virtualenv gcc libffi-devel createrepo byacc.x86_64 python-ply.noarch selinux-policy selinux-policy-devel
+RUN yum install -y git rpm-build libxml2-devel freetype-devel python-devel libxslt-devel zlib-devel openssl-devel python-virtualenv gcc libffi-devel createrepo byacc.x86_64 python-ply.noarch selinux-policy selinux-policy-devel vim
 RUN yum groupinstall -y "Development Tools"
 COPY start.sh /
 RUN chmod 777 start.sh

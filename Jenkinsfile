@@ -8,7 +8,6 @@ pipeline {
 		echo 'building xenial package'
                 withEnv(["PATH=/usr/local/bin:$PATH"]){ 
                              sh 'make build_ubuntu16'
-		             sh 'make run_u16'
                 }
             }
         }
