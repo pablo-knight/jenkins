@@ -67,7 +67,7 @@ Vagrant.configure("2") do |config|
         apt-get update
 
         # Install specific PI-Version
-        apt-get install -y /packages/privacyidea/privacyidea_3.6-1xenial_amd64.deb /packages/privacyidea-server/privacyidea-apache2_3.6-1xenial_all.deb
+        apt-get install -y /packages/privacyidea/privacyidea_3.6.1-1xenial_amd64.deb /packages/privacyidea-server/privacyidea-apache2_3.6.1-1xenial_all.deb
 
         # apt-get install -y privacyidea-apache2
         echo 'alias ll="ls -lav"' >> ~/.bashrc
