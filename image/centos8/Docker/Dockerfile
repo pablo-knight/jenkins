@@ -13,8 +13,10 @@ rm -f /lib/systemd/system/anaconda.target.wants/*;
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
 
-RUN yum install -y virtualenv selinux-policy-devel selinux-policy vim rsync createrepo
+RUN yum install epel-release -y
+RUN yum update -y
+RUN yum install -y virtualenv selinux-policy-devel selinux-policy jq
 RUN yum groupinstall -y "Development Tools"
 COPY start.sh /
-RUN chmod 777 start.sh
-RUN bash start.sh
+#RUN chmod 777 start.sh
+#RUN bash start.sh
